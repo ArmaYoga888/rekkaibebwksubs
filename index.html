@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>FrBall26 - Spin Club</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:#0b0f14;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+height:100vh;
+}
+
+.app{
+width:360px;
+background:#11161c;
+border-radius:18px;
+padding:25px;
+box-shadow:0 10px 40px rgba(0,0,0,.7);
+text-align:center;
+}
+
+.headerlogo{
+width:90px;
+margin-bottom:10px;
+}
+
+.title{
+font-size:22px;
+font-weight:600;
+margin-bottom:5px;
+}
+
+.subtitle{
+font-size:12px;
+opacity:.6;
+margin-bottom:20px;
+}
+
+.spinner{
+height:140px;
+background:#0b0f14;
+border-radius:14px;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+gap:8px;
+margin-bottom:18px;
+}
+
+.spinner img{
+width:60px;
+transition:0.2s;
+}
+
+.spinner.spin img{
+animation:spinlogo .4s linear infinite;
+}
+
+@keyframes spinlogo{
+0%{transform:rotate(0)}
+100%{transform:rotate(360deg)}
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:10px;
+background:#1f8bff;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+background:#2ea0ff;
+}
+
+.result{
+margin-top:15px;
+display:none;
+}
+
+.logo{
+width:90px;
+margin-bottom:8px;
+}
+
+.club{
+font-size:20px;
+font-weight:600;
+}
+
+.league{
+font-size:13px;
+opacity:.7;
+}
+
+.creator{
+margin-top:20px;
+font-size:12px;
+opacity:.5;
+}
+
+.confetti{
+position:fixed;
+width:8px;
+height:8px;
+top:-10px;
+animation:fall 3s linear forwards;
+}
+
+@keyframes fall{
+to{
+transform:translateY(100vh) rotate(720deg);
+opacity:0;
+}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<img id="headerLogo" class="headerlogo" src="https://i.supaimg.com/5f171245-a55c-427a-92da-ad2c1c0e5daa.png">
+
+<div class="title">
+<i class="fa-solid fa-futbol"></i> FrBall26
+</div>
+
+<div class="subtitle">
+Random Football Club Spinner
+</div>
+
+<div class="spinner" id="spinner">
+<img id="spinLogo" src="https://crests.football-data.org/66.png">
+<div id="spinText">Tap Spin</div>
+</div>
+
+<button onclick="spin()">
+<i class="fa-solid fa-rotate"></i> Spin Club
+</button>
+
+<div class="result" id="result">
+
+<img id="logo" class="logo">
+<div class="club" id="club"></div>
+<div class="league" id="league"></div>
+
+</div>
+
+<div class="creator">
+<i class="fa-solid fa-code"></i> Creator : Frogzz
+</div>
+
+</div>
+
+<audio id="spinSound">
+<source src="https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3">
+</audio>
+
+<audio id="winSound">
+<source src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3">
+</audio>
+
+<script>
+
+const clubs = [
+
+{name:"Manchester United",league:"Premier League",logo:"https://crests.football-data.org/66.png"},
+{name:"Manchester City",league:"Premier League",logo:"https://crests.football-data.org/65.png"},
+{name:"Liverpool",league:"Premier League",logo:"https://crests.football-data.org/64.png"},
+{name:"Arsenal",league:"Premier League",logo:"https://crests.football-data.org/57.png"},
+{name:"Chelsea",league:"Premier League",logo:"https://crests.football-data.org/61.png"},
+{name:"Tottenham",league:"Premier League",logo:"https://crests.football-data.org/73.png"},
+{name:"Newcastle",league:"Premier League",logo:"https://crests.football-data.org/67.png"},
+{name:"Brighton",league:"Premier League",logo:"https://crests.football-data.org/397.png"},
+{name:"West Ham",league:"Premier League",logo:"https://crests.football-data.org/563.png"},
+{name:"Aston Villa",league:"Premier League",logo:"https://crests.football-data.org/58.png"},
+
+{name:"Real Madrid",league:"La Liga",logo:"https://crests.football-data.org/86.png"},
+{name:"Barcelona",league:"La Liga",logo:"https://crests.football-data.org/81.png"},
+{name:"Atletico Madrid",league:"La Liga",logo:"https://crests.football-data.org/78.png"},
+{name:"Sevilla",league:"La Liga",logo:"https://crests.football-data.org/559.png"},
+{name:"Real Sociedad",league:"La Liga",logo:"https://crests.football-data.org/92.png"},
+{name:"Valencia",league:"La Liga",logo:"https://crests.football-data.org/95.png"},
+{name:"Villarreal",league:"La Liga",logo:"https://crests.football-data.org/94.png"},
+{name:"Real Betis",league:"La Liga",logo:"https://crests.football-data.org/90.png"},
+
+{name:"Juventus",league:"Serie A",logo:"https://crests.football-data.org/109.png"},
+{name:"AC Milan",league:"Serie A",logo:"https://crests.football-data.org/98.png"},
+{name:"Inter Milan",league:"Serie A",logo:"https://crests.football-data.org/108.png"},
+{name:"Napoli",league:"Serie A",logo:"https://crests.football-data.org/113.png"},
+{name:"Roma",league:"Serie A",logo:"https://crests.football-data.org/100.png"},
+{name:"Lazio",league:"Serie A",logo:"https://crests.football-data.org/110.png"},
+{name:"Atalanta",league:"Serie A",logo:"https://crests.football-data.org/102.png"},
+{name:"Fiorentina",league:"Serie A",logo:"https://crests.football-data.org/99.png"}
+
+];
+
+let spinning=false;
+
+function spin(){
+
+if(spinning) return;
+spinning=true;
+
+document.getElementById("result").style.display="none";
+
+const spinSound=document.getElementById("spinSound");
+spinSound.currentTime=0;
+spinSound.play();
+
+const spinner=document.getElementById("spinner");
+spinner.classList.add("spin");
+
+let speed=40;
+let cycles=0;
+let finalClub=null;
+
+function loop(){
+
+const r=clubs[Math.floor(Math.random()*clubs.length)];
+finalClub=r;
+
+document.getElementById("spinText").innerText=r.name;
+document.getElementById("spinLogo").src=r.logo;
+
+cycles++;
+
+speed+=5;
+
+if(cycles<40){
+
+setTimeout(loop,speed);
+
+}else{
+
+spinner.classList.remove("spin");
+showResult(finalClub);
+spinning=false;
+
+}
+
+}
+
+loop();
+
+}
+
+function showResult(c){
+
+document.getElementById("club").innerText=c.name;
+document.getElementById("league").innerText=c.league;
+document.getElementById("logo").src=c.logo;
+
+document.getElementById("result").style.display="block";
+
+document.getElementById("winSound").play();
+
+confetti();
+
+}
+
+function confetti(){
+
+for(let i=0;i<80;i++){
+
+const d=document.createElement("div");
+
+d.className="confetti";
+
+d.style.left=Math.random()*100+"vw";
+d.style.background=`hsl(${Math.random()*360},70%,60%)`;
+d.style.animationDuration=(Math.random()*2+2)+"s";
+
+document.body.appendChild(d);
+
+setTimeout(()=>d.remove(),3000);
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
